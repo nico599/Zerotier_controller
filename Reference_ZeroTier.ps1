@@ -1,47 +1,93 @@
 ﻿echo "::welcome::"
-echo "This tool attempts to make ZeroTier service stop and start"
+echo "This tool attempts to make ZeroTier service/process/device stop and start"
 echo "----------------------------------------------------------"
-echo "version 0.1 No Warranty"
+echo "version 0.2 No Warranty"
 echo "----------------------------------------------------------"
 sleep 3;
 
-$checkProcess = get-process "zerotier*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName;
+#Variables to adjust if something isn't working.."
+$processName = 'zerotier';
+$serviceName = 'ZeroTierOneService';
+$zeroEP = 'C:\Program Files (x86)\ZeroTier\One\ZeroTier One.exe';
+$zDeviceName = 'ZeroTier One Virtual Port';
+$zProcessName = 'ZeroTier One';
 
 
- 
-    function stopZero { 
+
+
+$checkProcess = Get-Process "$processName*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName;
+$zProcessID = Get-Process "$processName*" |select Id -ExpandProperty Id;
+#Should return OK, or someother status
+$zDeviceStatus = Get-PnpDevice -FriendlyName "$zDeviceName"|select Status -ExpandProperty Status;
+
+function stopZero { 
     echo "Zerotier appears to be Running"
-    #echo ( get-process "zerotier*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName )
     $choice = Read-Host 'Would you like to stop ZeroTier? y?'
-    if($choice -eq "y"){
-        echo "Attempting to stop service"
+    if( $choice -eq "y" ) {
+        
+        echo "Attempting to stop service..."
         sleep 2
-        Stop-Process -processname (get-process "zerotier*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName ) -Force -v
-        Stop-Service -Name "ZeroTierOneService" -v
+        
         sleep 2
-        if((get-process "zerotier*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName) -eq $Null){ 
-        echo "stopped"
+        Stop-Process -processname (get-process "$processName*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName ) -Force -Verbose
         sleep 2
+        Stop-Service -Name "ZeroTierOneService" -Verbose
+        sleep 2
+         echo Y | Disable-PnpDevice (Get-PnpDevice -FriendlyName "$zDeviceName"|select InstanceId -ExpandProperty InstanceId) -Verbose
+        sleep 2
+        if ( $checkProcess ) { 
+            echo "stopped..."
+            sleep 2
+            echo "device status: $zDeviceStatus"
+            echo "process id: $zProcessId"
+            sleep 3;
         }
         else {
-                echo "something went wrong when attempting to check if process exists, this should not happen"
-                }
+            echo "something went wrong when attempting to check if process exists, this should not happen.";
         }
     }
-
-
-if ( ! $checkProcess ) { 
-        $isnull++
-        echo "Zerotier is Not Running"
-        $choice2 = Read-Host 'Would you like to start ZeroTier? y?'
-        if($choice -eq "y"){
-            echo "attempting to start service"
-            sleep 2
-            Start-Process -FilePath "C:\Program Files (x86)\ZeroTier\One\ZeroTier One.exe"
-            Start-Service -Name "ZeroTierOneService"
-            echo "Zerotier started successfully"
-            Start-Process -processname "ZeroTier One"
-            }
-}else{
-    stopZero;
 }
+
+function startZero {
+     echo "Zerotier is Not Running"
+     $choice2 = Read-Host 'Would you like to start ZeroTier? y?'
+     if( $choice2 -eq "y" ) {
+        echo "attempting to start service.."
+        sleep 3;
+        echo Y | Enable-PnpDevice (Get-PnpDevice -FriendlyName "$zDeviceName"|select InstanceId -ExpandProperty InstanceId) -Verbose
+        sleep 3;
+        Start-Process -FilePath "$zeroEP" -Verbose
+        sleep 3;
+        Start-Service -Name "$serviceName" -Verbose
+        sleep 5
+        #Start-Process -processname "$zProcessName" -v
+        sleep 2
+        if ( ! $checkProcess ) { 
+           echo "Zerotier is still not Running"
+           }
+           else {
+            echo "Zerotier is now Running"
+            sleep 2;
+            echo "device status: $zDeviceStatus"
+            echo "process id: $zProcessId"
+            sleep 3;
+            }
+            echo "Zerotier started successfully..."
+            sleep 1;   
+         }
+}
+
+
+##Main Operations
+
+if ( ! $checkProcess ) {
+    startZero;
+    echo "process complete..."
+}
+else {
+    stopZero;
+    echo "process complete..."
+}
+
+echo "bye~!"
+sleep 2;
