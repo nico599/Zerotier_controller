@@ -1,13 +1,12 @@
 # Zerotier_controller
-control whether Zerotier is running or not
+control whether Zerotier is running or not, will stop the background service, and the virtual device.
 
-This simple applet will determine if Zerotier is running and can either stop or start it.
-I made this because I only needed Zerotier once a week, and didn't want it to run 24/7 otherwise.
+This simple applet will determine if Zerotier is running and can either stop or start it. The applet is a combination of two scripts. The first `Run_ZeroTier` works as a wrapper executing the second. This is to allow users to stay safe and not change their global script execution settings which you'd otherwise be forced to do.
 
-To use this you simply need to place the reference script somewhere you like for example in your myDocuments folder.
-Then keep the Run_ZeroTier handy somewhere like the desktop.
+How To:
 
-The Run script needs adjustment to point to your reference script. Then its as simple as double clicking on the Run script to actually run.
-This process of having one reference the other prevents needing to override global script defaults which is risky.
+To use this you simply need to place the reference script anywhere you like for example in your Documents folder. Then keep the Run_ZeroTier handy somewhere like the Desktop.
+
+The `Run_ZeroTier.ps1` file should be updated to check/correct the path variable.
 
 Enjoy.
