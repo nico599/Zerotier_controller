@@ -1,0 +1,1 @@
+﻿PowerShell -NoProfile -ExecutionPolicy Unrestricted -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Unrestricted -File ""C:\Users\Nick\Documents\Reference_ZeroTier.ps1""' -Verb RunAs}";
