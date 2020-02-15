@@ -29,11 +29,12 @@ function stopZero {
         sleep 2
         
         sleep 2
-        Stop-Process -processname (get-process "$processName*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName ) -Force -Verbose
+        Stop-Process -processname ( get-process "$processName*" -ea SilentlyContinue |select ProcessName -ExpandProperty ProcessName ) -Force -Verbose
         sleep 2
         Stop-Service -Name "ZeroTierOneService" -Verbose
         sleep 2
-         echo Y | Disable-PnpDevice (Get-PnpDevice -FriendlyName "$zDeviceName"|select InstanceId -ExpandProperty InstanceId) -Verbose
+        Get-PnpDevice -FriendlyName "$zDeviceName"| Disable-PnpDevice  -confirm:$false -Verbose 
+         #echo Y | Disable-PnpDevice -InstanceId $deviceID -Verbose
         sleep 2
         if ( $checkProcess ) { 
             echo "stopped..."
@@ -54,7 +55,8 @@ function startZero {
      if( $choice2 -eq "y" ) {
         echo "attempting to start service.."
         sleep 3;
-        echo Y | Enable-PnpDevice (Get-PnpDevice -FriendlyName "$zDeviceName"|select InstanceId -ExpandProperty InstanceId) -Verbose
+        Get-PnpDevice -FriendlyName "$zDeviceName"| Enable-PnpDevice  -confirm:$false -Verbose 
+        #echo Y | Enable-PnpDevice -InstanceId $deviceID -Verbose
         sleep 3;
         Start-Process -FilePath "$zeroEP" -Verbose
         sleep 3;
